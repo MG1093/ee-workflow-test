@@ -1,0 +1,4 @@
+pytest==8.3.3
+requests-mock==1.12.1
+pytest_html==4.1.1
+coverage==7.6.4
