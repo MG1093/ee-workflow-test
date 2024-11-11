@@ -1,43 +1,166 @@
-## :warning: Please read these instructions carefully and entirely first
-* Clone this repository to your local machine.
-* Use your IDE of choice to complete the assignment.
-* When you have completed the assignment, you need to  push your code to this repository and [mark the assignment as completed by clicking here](https://app.snapcode.review/submission_links/7bd039c2-1874-4a95-8717-87069092404c).
-* Once you mark it as completed, your access to this repository will be revoked. Please make sure that you have completed the assignment and pushed all code from your local machine to this repository before you click the link.
 
-## Operability Take-Home Exercise
 
-Welcome to the start of our recruitment process for Operability Engineers. It was great to speak to you regarding an opportunity to join the Equal Experts network!
+# Equal Experts: Flask GitHub API Gist App
 
-Please write code to deliver a solution to the problems outlined below.
+This project provides a Flask web application that interacts with the GitHub API to retrieve public gists for a given user. The app includes support for **pagination** and **caching**, and can be tested using **unit** and **integration tests**.
 
-We appreciate that your time is valuable and do not expect this exercise to **take more than 90 minutes**. If you think this exercise will take longer than that, I **strongly** encourage you to please get in touch to ask any clarifying questions.
+---
 
-### Submission guidelines
-**Do**
-- Provide a README file in text or markdown format that documents a concise way to set up and run the provided solution.
-- Take the time to read any applicable API or service docs, it may save you significant effort.
-- Make your solution simple and clear. We aren't looking for overly complex ways to solve the problem since in our experience, simple and clear solutions to problems are generally the most maintainable and extensible solutions.
+## Overview
 
-**Don't**
+You have two options for setting up and running the application:
 
-Expect the reviewer to dedicate a machine to review the test by:
+1. **Manual Setup** – Install dependencies, build the Docker container, and run tests manually.
+2. **Automated Pipeline** – Use the provided `local_pipeline.sh` script for a fully automated setup.
 
-- Installing software globally that may conflict with system software
-- Requiring changes to system-wide configurations
-- Providing overly complex solutions that need to spin up a ton of unneeded supporting dependencies. We aspire to keep our dev experiences as simple as possible (but no simpler)!
-- Include identifying information in your submission. We are endeavouring to make our review process anonymous to reduce bias.
+---
 
-### Exercise
-If you have any questions on the below exercise, please do get in touch and we’ll answer as soon as possible.
+## Table of Contents
 
-#### Build an API, test it, and package it into a container
-- Build a simple HTTP web server API in any general-purpose programming language[^1] that interacts with the GitHub API and responds to requests on `/<USER>` with a list of the user’s publicly available Gists[^2].
-- Create an automated test to validate that your web server API works. An example user to use as test data is `octocat`.
-- Package the web server API into a docker container that listens for requests on port `8080`. You do not need to publish the resulting container image in any container registry, but we are expecting the Dockerfile in the submission.
-- The solution may optionally provide other functionality (e.g. pagination, caching) but the above **must** be implemented.
+- [Equal Experts: Flask GitHub API Gist App](#equal-experts-flask-github-api-gist-app)
+  - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
+  - [Option 1: Manual Setup](#option-1-manual-setup)
+    - [Step 1: Create Virtual Environment \& Install Dependencies](#step-1-create-virtual-environment--install-dependencies)
+    - [Step 2: Run Unit Tests](#step-2-run-unit-tests)
+    - [Step 3: Build the Docker Image](#step-3-build-the-docker-image)
+    - [Step 4: Start the Docker Container](#step-4-start-the-docker-container)
+    - [Step 5: Run Integration Tests](#step-5-run-integration-tests)
+    - [Step 6: Clean Up](#step-6-clean-up)
+  - [Option 2: Automated Setup with `local_pipeline.sh`](#option-2-automated-setup-with-local_pipelinesh)
+    - [Step 1: Run the Pipeline Script](#step-1-run-the-pipeline-script)
+    - [What the Script Does](#what-the-script-does)
+  - [Test Report](#test-report)
+  - [Requirements](#requirements)
+  - [Notes](#notes)
 
-Best of luck,  
-Equal Experts
-__________________________________________
-[^1]: For example Go, Python or Ruby but not Bash or Powershell.  
-[^2]: https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28
+---
+
+## Option 1: Manual Setup
+
+### Step 1: Create Virtual Environment & Install Dependencies
+
+1. **Create a Virtual Environment**:
+
+   ```bash
+   python3.12 -m venv .venv
+   ```
+
+2. **Activate the Virtual Environment**:
+
+   ```bash
+   source .venv/bin/activate
+   ```
+
+3. **Install Required Dependencies**:
+
+   ```bash
+   pip install -r app/requirements.txt
+   pip install -r tests/requirements.txt
+   ```
+
+---
+
+### Step 2: Run Unit Tests
+
+Run the unit tests to ensure everything works locally:
+
+```bash
+pytest -vv tests/unit_tests --maxfail=1
+```
+
+---
+
+### Step 3: Build the Docker Image
+
+Once the unit tests pass, build the Docker image:
+
+```bash
+docker build -t equal-exports-gist-app-img .
+```
+
+---
+
+### Step 4: Start the Docker Container
+
+Run the Docker container on port `8080`:
+
+```bash
+docker run -d --name equal-exports-gist-app -p 8080:8080 equal-exports-gist-app-img
+```
+
+---
+
+### Step 5: Run Integration Tests
+
+Run the integration tests against the running Docker container:
+
+```bash
+pytest -vv tests/integration_tests/test_main.py --maxfail=1
+```
+
+---
+
+### Step 6: Clean Up
+
+After tests are finished, stop and remove the Docker container:
+
+```bash
+docker stop equal-exports-gist-app
+docker rm equal-exports-gist-app
+```
+
+---
+
+## Option 2: Automated Setup with `local_pipeline.sh`
+
+For a fully automated process, use the `local_pipeline.sh` script. This script will handle everything from dependency installation to running tests and managing Docker.
+
+### Step 1: Run the Pipeline Script
+
+Make sure the script is executable and then run it:
+
+```bash
+chmod +x local_pipeline.sh  # Make it executable
+./local_pipeline.sh         # Run the script
+```
+
+---
+
+### What the Script Does
+
+- Creates and activates a virtual environment
+- Installs dependencies from `requirements.txt`
+- Runs unit tests
+- Pip install and docker logs are directed to log files
+- Generates an HTML report of the test results and coverage
+- Builds the Docker container if unit tests pass
+- Starts the Docker container and runs integration tests
+- Cleans up by stopping and removing the Docker container
+
+---
+
+## Test Report
+
+The `local_pipeline.sh` script will generate an HTML test report located in the `tests/coverage_html_report` directory. Open this file in a browser to view detailed test results and coverage information.
+
+---
+
+## Requirements
+
+- **Python 3.12** or higher
+- **Docker**
+- **pip** (for installing Python dependencies)
+- **pytest** (for running the tests)
+
+---
+
+## Notes
+
+- **Manual Setup**: If you choose to manually set up the app, make sure to start the Docker container and run tests separately.
+- **Automated Setup**: The `local_pipeline.sh` script automates all steps, including setting up the environment, installing dependencies, running tests, and handling Docker.
+- **Local Development**: If you prefer local development without using Docker, you can run the Flask app directly by executing:
+
+  ```bash
+  python3 app/main.py
+  ```
