@@ -1,7 +1,10 @@
 import pytest
 import requests
+import os
 
-BASE_URL = "http://localhost:8080"  # Localhost where the Flask app is running
+BASE_URL = os.getenv(
+    "BASE_URL", "http://localhost:8080"
+)  # Localhost where the Flask app is running
 
 
 @pytest.fixture
@@ -58,7 +61,10 @@ def test_get_gists_invalid_per_page(user):
 
     # Check the error message in the response
     response_json = response.json()
-    assert response_json["message"] == "'page' and 'per_page' query parameters must be numbers"
+    assert (
+        response_json["message"]
+        == "'page' and 'per_page' query parameters must be numbers"
+    )
 
 
 def test_get_gists_invalid_page(user):
@@ -71,7 +77,10 @@ def test_get_gists_invalid_page(user):
 
     # Check the error message in the response
     response_json = response.json()
-    assert response_json["message"] == "'page' and 'per_page' query parameters must be numbers"
+    assert (
+        response_json["message"]
+        == "'page' and 'per_page' query parameters must be numbers"
+    )
 
 
 def test_get_gists_invalid_per_page_value(user):

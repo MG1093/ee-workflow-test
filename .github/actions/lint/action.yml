@@ -1,0 +1,17 @@
+name: 'Run Linting'
+description: 'Run Flake8 for linting Python code'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Run Flake8
+      uses: py-actions/flake8@v2
+      with:
+        max-line-length: "120"
+        path: 'app'
+

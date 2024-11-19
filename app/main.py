@@ -83,6 +83,48 @@ def public_gists_route(user):
         )
 
 
+@app.route("/health/liveness", methods=["GET"])
+def liveness_check():
+    """Check if the app is alive. This is a basic check."""
+    return (
+        jsonify({"status": "alive", "message": "The application is alive and running"}),
+        200,
+    )
+
+
+@app.route("/health/readiness", methods=["GET"])
+def readiness_check():
+    """Check if the app is ready to serve traffic. For example, check the GitHub API."""
+    try:
+        # This is a simple readiness check, like checking if the GitHub API is reachable
+
+        # NOTE: You can uncomment this code and the container will fail after a while 503 rate limiting error
+
+        # response = requests.get("https://api.github.com", timeout=5)
+        # response.raise_for_status()  # Will raise an error if response is not 2xx
+
+        return (
+            jsonify(
+                {
+                    "status": "ready",
+                    "message": "The application is ready to serve traffic",
+                }
+            ),
+            200,
+        )
+    except requests.exceptions.RequestException as e:
+        # Return more details in the message for better insight
+        return (
+            jsonify(
+                {
+                    "status": "unavailable",
+                    "message": f"GitHub API is unreachable: {str(e)}",
+                }
+            ),
+            503,
+        )
+
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({"error": "Not found", "message": error.description}), 404
@@ -90,7 +132,10 @@ def not_found(error):
 
 @app.errorhandler(500)
 def internal_error(error):
-    return jsonify({"error": "Internal Server Error", "message": error.description}), 500
+    return (
+        jsonify({"error": "Internal Server Error", "message": error.description}),
+        500,
+    )
 
 
 if __name__ == "__main__":

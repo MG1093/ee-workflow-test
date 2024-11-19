@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ee-flask-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ee-flask-app
+  template:
+    metadata:
+      labels:
+        app: ee-flask-app
+    spec:
+      containers:
+        - name: ee-flask-app
+          image: localhost:5000/ee-flask-app:latest
+          ports:
+            - containerPort: 8080
+          # Liveness Probe
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8080
+            initialDelaySeconds: 10  # Start probing 10 seconds after the container starts
+            periodSeconds: 5         # Probe every 5 seconds
+            failureThreshold: 3      # If 3 consecutive probes fail, the pod is restarted
+
+          # Readiness Probe
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 8080
+            initialDelaySeconds: 5   # Start probing 5 seconds after the container starts
+            periodSeconds: 5         # Probe every 5 seconds
+            failureThreshold: 3      # If 3 consecutive probes fail, it will be marked as not ready
+
+          resources:
+            limits:
+              memory: "256Mi"  # Maximum memory allowed
+              cpu: "200m"       # Maximum CPU allowed (200 milliCPU)
+            requests:
+              memory: "128Mi"  # Initial memory request
+              cpu: "100m"       # Initial CPU request

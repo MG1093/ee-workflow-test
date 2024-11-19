@@ -1,0 +1,76 @@
+name: Equal Experts CD Pipeline
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  # Local Job for Building and Publishing Docker Image
+  release_local:
+    if: ${{ github.event.act }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Kubernetes Local
+        uses: ./.github/actions/release
+        with: 
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
+
+  integration_test_local:
+    if: ${{ github.event.act }}
+    needs: release_local
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Integration Tests Local
+        uses: ./.github/actions/integration_tests
+
+  # Staging Deployment
+  release_staging:
+    if: ${{ !github.event.act }}
+    needs: integration_test_local
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to Staging Environment"
+          # Add your deployment commands here (e.g., kubectl, helm, etc.)
+
+  integration_test_staging:
+    if: ${{ !github.event.act }}
+    needs: release_staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Integration Tests Staging
+        uses: ./.github/actions/integration_tests
+
+  # Production Deployment
+  release_prod:
+    if: ${{ !github.event.act }}
+    runs-on: ubuntu-latest
+    needs: integration_test_staging
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Production
+        run: |
+          echo "Manual Approval Required"
+          echo "Deploying to Production Environment"
+          # Add your deployment commands here (e.g., kubectl, helm, etc.)
+
+  integration_test_prod:
+    if: ${{ !github.event.act }}
+    needs: release_prod
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Integration Tests Staging
+        uses: ./.github/actions/integration_tests

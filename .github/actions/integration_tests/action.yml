@@ -1,0 +1,26 @@
+name: 'Run Integration Test'
+description: 'Run pytest in a virtual environment'
+
+runs:
+  using: "composite"
+  steps: 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies from app
+      shell: bash
+      run: |      
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -q --upgrade pip
+          pip install -q -r app/requirements.txt
+          pip install -q -r tests/requirements.txt
+
+    - name: Run Unit Tests
+      shell: bash
+      run: |
+        source .venv/bin/activate
+        export BASE_URL=http://localhost:30000
+        pytest -vv tests/integration_tests --maxfail=3 --disable-warnings

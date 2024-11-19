@@ -1,0 +1,49 @@
+name: Equal Experts CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run_lint:
+    name: Run Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run Linting
+      uses: ./.github/actions/lint
+
+  run_unit_tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run Unit Tests
+      uses: ./.github/actions/unit_tests
+  
+  build_and_publish_local:
+    if: ${{ github.event.act }}
+    runs-on: ubuntu-latest
+    needs: ['run_lint', 'run_unit_tests']
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and Publish Docker Image
+        uses: ./.github/actions/build_publish
+        with:
+          image_name: 'ee-flask-app'
+          registry_type: 'local'
+
+  build_and_publish:
+    if: ${{ !github.event.act }}
+    runs-on: ubuntu-latest
+    needs: ['run_lint', 'run_unit_tests']
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and Publish Docker Image
+        uses: ./.github/actions/build_publish
+        with:
+          image_name: 'ee-flask-app'
+          registry_type: 'dockerhub'

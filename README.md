@@ -34,10 +34,12 @@ You have two options for setting up and running the application:
     - [Step 4: Start the Docker Container](#step-4-start-the-docker-container)
     - [Step 5: Run Integration Tests](#step-5-run-integration-tests)
     - [Step 6: Clean Up](#step-6-clean-up)
-  - [Option 2: Automated Setup with `local_pipeline.sh`](#option-2-automated-setup-with-local_pipelinesh)
+  - [Option 2: Automated Setup with `local_pipeline.sh` (Dev Only, less dependencies)](#option-2-automated-setup-with-local_pipelinesh-dev-only-less-dependencies)
     - [Step 1: Run the Pipeline Script](#step-1-run-the-pipeline-script)
     - [What the Script Does](#what-the-script-does)
   - [Test Report](#test-report)
+    - [Option 3: Run Github Worflow Locally (Enterprise Setup)](#option-3-run-github-worflow-locally-enterprise-setup)
+  - [BUG: To be fixed](#bug-to-be-fixed)
   - [Requirements](#requirements)
   - [Notes](#notes)
 
@@ -119,7 +121,7 @@ docker rm equal-exports-gist-app
 
 ---
 
-## Option 2: Automated Setup with `local_pipeline.sh`
+## Option 2: Automated Setup with `local_pipeline.sh` (Dev Only, less dependencies)
 
 For a fully automated process, use the `local_pipeline.sh` script. This script will handle everything from dependency installation to running tests and managing Docker.
 
@@ -131,8 +133,6 @@ Make sure the script is executable and then run it:
 chmod +x local_pipeline.sh  # Make it executable
 ./local_pipeline.sh         # Run the script
 ```
-
----
 
 ### What the Script Does
 
@@ -152,6 +152,38 @@ chmod +x local_pipeline.sh  # Make it executable
 The `local_pipeline.sh` script will generate an HTML test report located in the `tests/coverage_html_report` directory. Open this file in a browser to view detailed test results and coverage information.
 
 ---
+
+### Option 3: Run Github Worflow Locally (Enterprise Setup)
+
+To run the CI/CD pipeline locally, ensure the following prerequisites are met:
+
+Docker Desktop is installed, with Kubernetes enabled.
+
+The act CLI is installed. Follow the installation guide here: https://nektosact.com/installation/index.html.
+
+If you want to run the CI Pipeline locally
+
+```bash
+act pull_request --graph
+act pull_request -e event.json
+```
+
+If you want to run the CD pipeline locally
+
+## BUG: To be fixed
+
+For now run these commands after the CI pipeline, incorporating this into CD locally still WIP
+
+```bash
+kubectl apply -f k8s/deployments.yaml  
+kubectl apply -f k8s/services.yaml  
+```
+
+```bash
+act release --graph
+act release -e event.json -s KUBECONFIG_CONTENT="$(~/.kube/config)"
+```
+
 
 ## Requirements
 

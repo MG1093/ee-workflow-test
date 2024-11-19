@@ -1,0 +1,21 @@
+name: 'Release'
+description: 'Release to environment'
+
+inputs:
+  KUBECONFIG_CONTENT:
+    description: 'The kube config file'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Set up kubectl
+    uses: azure/setup-kubectl@v3
+    with:
+      version: 'latest'
+
+  - name: Set up Kubernetes config (WIP)
+    shell: bash
+    run: |
+      mkdir -p $HOME/.kube
+      echo "${{ inputs.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
