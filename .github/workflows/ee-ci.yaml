@@ -1,0 +1,15 @@
+name: Equal Experts CI Pipeline
+
+on:
+  push:
+    branches:
+      - solution
+
+jobs: 
+  hello_world:
+    runs-on: [ self-hosted, ubuntu-latest ]
+    steps:
+    - name: Hello Workd
+      shell: bash
+      run: | 
+        "echo Hello World"
